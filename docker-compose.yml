@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongo_container
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data:/data/db
+    networks:
+      - dota_network
+
+  parser_app:
+    build: ./app
+    container_name: parser_container
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://root:example@mongodb:27017/dota?authSource=admin
+    volumes:
+      - ./app:/app
+    networks:
+      - dota_network
+    command: ["python", "/app/fetch_data.py"]
+
+networks:
+  dota_network:
+    driver: bridge
