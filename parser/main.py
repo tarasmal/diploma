@@ -7,13 +7,16 @@ MONGO_URI = "mongodb://localhost:27017"
 DATABASE_NAME = "dota"
 MATCHES_COLLECTION = "matches"
 MATCHES_INFO_COLLECTION = "matches_info"
+BENCHMARKS_COLLECTION = "heroes"
 
 client = MongoClient(MONGO_URI)
 db = client[DATABASE_NAME]
 matches_collection = db[MATCHES_COLLECTION]
 matches_info_collection = db[MATCHES_INFO_COLLECTION]
+heroes_collection = db[BENCHMARKS_COLLECTION]
 
 matches_info_collection.create_index("match_id", unique=True)
+heroes_collection.create_index("hero_id", unique=True)
 
 LAST_MATCH_FILE = "last_match_id_info.txt"
 
@@ -88,6 +91,40 @@ def fetch_match_details():
 
     print(f"Finished processing. Total matches processed: {processed_count}/{total_matches}")
 
+def fetch_heroes_benchmarks(hero_id):
+    params = {"api_key": API_KEY}
+    url = f"https://api.opendota.com/api/benchmarks?hero_id={hero_id}"
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        result = data.get("result", {})
+        result["hero_id"] = hero_id
+        return result
+    else:
+        raise Exception(f"Failed to fetch benchmarks for hero_id: {hero_id}")
+
+
+
+def get_heroes_with_benchmarks():
+    params = {"api_key": API_KEY}
+    url = f"https://api.opendota.com/api/heroes"
+    response = requests.get(url, params=params)
+    result = []
+    if response.status_code == 200:
+        heroes_data = response.json()
+        for hero in heroes_data:
+            benchmark = fetch_heroes_benchmarks(hero["id"])
+            combined = {**hero, **benchmark}
+            result.append(combined)
+
+        return result
+    else:
+        raise Exception(f"Failed to get heroes data: {response.status_code}")
+
+def write_heroes_to_collection(data):
+    heroes_collection.insert_many(data)
 
 if __name__ == "__main__":
-    fetch_match_details()
+    # fetch_match_details()
+    heroes = get_heroes_with_benchmarks()
+    write_heroes_to_collection(heroes)
