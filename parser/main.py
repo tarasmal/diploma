@@ -126,5 +126,18 @@ def write_heroes_to_collection(data):
 
 if __name__ == "__main__":
     # fetch_match_details()
-    heroes = get_heroes_with_benchmarks()
-    write_heroes_to_collection(heroes)
+    # heroes = get_heroes_with_benchmarks()
+    # write_heroes_to_collection(heroes)
+    import requests
+    from datetime import datetime
+
+    url = "https://api.opendota.com/api/constants/patch"
+    data = requests.get(url).json()
+    print(data)
+    for x in data:
+        print(x)
+    # for patch_id, info in sorted(data.items(), key=lambda x: int(x[0]), reverse=True):
+    #     name = info['name']
+    #     date = datetime.fromtimestamp(info['release_date']).strftime('%Y-%m-%d')
+    #     print(f"{patch_id}: {name} — {date}")
+
