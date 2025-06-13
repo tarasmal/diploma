@@ -20,7 +20,7 @@ heroes_collection.create_index("hero_id", unique=True)
 
 LAST_MATCH_FILE = "last_match_id_info.txt"
 
-API_KEY = "616f7383-7e54-4e10-b983-9933317ba8e6"
+API_KEY = "API_KEY"
 
 
 def save_last_match_id(match_id):
